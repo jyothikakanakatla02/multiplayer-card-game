@@ -1,0 +1,74 @@
+<<<<<<< HEAD
+
+from players.player import Player
+from rooms.storage import create_room
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+@api_view(["POST"])
+def create_room_view(request):
+    nickname = request.data["nickname"]
+    avatar = request.data["avatar"]
+    player = Player(nickname,avatar)
+    room_id = create_room(player)
+    return Response({
+        "room_id" : room_id,
+        "player_id" : player.player_id,
+        "nickname" : player.nickname,
+        "avatar" : player.avatar
+    })
+=======
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+>>>>>>> 3148ab1bdd29f6257ef0fc56d2deaf8eb90815ea
+from rest_framework import status
+from players.player import Player
+from rooms.storage import add_player_to_room
+@api_view(["POST"])
+def join_room(request):
+    room_id = request.data.get("room_id")
+    nickname = request.data.get("nickname")
+    avatar = request.data.get("avatar")
+    if room_id is None or nickname is None or avatar is None:
+        return Response(
+            {"status" : "error",
+             "message" : "Required fields are missing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    room_id = room_id.strip()
+    if not room_id:
+        return Response(
+            {"status" : "error",
+             "message" : "Room ID cannot be empty"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        player = Player(nickname, avatar)
+    except ValueError as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        add_player_to_room(room_id, player)
+    except Exception as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+            )
+    return Response(
+        {"status" : "success",
+         "room_id" : room_id,
+         "player_id" : player.player_id
+        }
+        )
+<<<<<<< HEAD
+=======
+
+        
+>>>>>>> 3148ab1bdd29f6257ef0fc56d2deaf8eb90815ea
