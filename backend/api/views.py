@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 from players.player import Player
 from rooms.storage import create_room
@@ -15,6 +16,10 @@ def create_room_view(request):
         "nickname" : player.nickname,
         "avatar" : player.avatar
     })
+=======
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+>>>>>>> 3148ab1bdd29f6257ef0fc56d2deaf8eb90815ea
 from rest_framework import status
 from players.player import Player
 from rooms.storage import add_player_to_room
@@ -62,3 +67,8 @@ def join_room(request):
          "player_id" : player.player_id
         }
         )
+<<<<<<< HEAD
+=======
+
+        
+>>>>>>> 3148ab1bdd29f6257ef0fc56d2deaf8eb90815ea
