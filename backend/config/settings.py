@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'players',
     'game_engine',
     'websocket',
+    'api',
+    'rest_framework',
 
 ]
 ASGI_APPLICATION = "config.asgi.application"
