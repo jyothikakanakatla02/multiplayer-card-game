@@ -18,4 +18,8 @@ def add_player_to_room(room_id,player):
         raise ValueError("Room not found")
     room = active_rooms[room_id]
     room.add_player(player)
-
+def get_room(room_id):
+    room = active_rooms.get(room_id)
+    if room is None:
+        raise ValueError("Room not found")
+    return room

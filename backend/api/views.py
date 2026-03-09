@@ -61,4 +61,31 @@ def join_room(request):
          "player_id" : player.player_id
         }
         )
-
+from rooms.storage import get_room
+@api_view(["GET"])
+def room_state(request,room_id):
+    try:
+        room = get_room(room_id)
+    except ValueError as e:
+        return Response(
+            {
+                "status" : "error",
+                "message" : str(e)
+            },
+            status = status.HTTP_404_NOT_FOUND
+        )
+    players_data = []
+    for player in room.players:
+        if player.player_id == room.host_player_id:
+            is_host = True
+        else:
+            is_host = False
+        players_data.append({"nickname":player.nickname,
+                             "avatar": player.avatar,
+                             "is_host" : is_host})
+    return Response({
+        "status" : "success",
+        "room_id" : room_id,
+        "total_players" : len(players_data),
+        "players" : players_data
+    })
