@@ -16,7 +16,7 @@ def create_room_view(request):
     })
 from rest_framework import status
 from players.player import Player
-from rooms.storage import add_player_to_room
+from rooms.storage import add_player_to_room, remove_player_from_room
 @api_view(["POST"])
 def join_room(request):
     room_id = request.data.get("room_id")
@@ -61,4 +61,31 @@ def join_room(request):
          "player_id" : player.player_id
         }
         )
+@api_view(["POST"])
+def leave_room(request):
+    room_id = request.data.get("room_id")
+    player_id = request.data.get("player_id")
+    if room_id is None or player_id is None:
+        return Response(
+            {"status" : "error",
+             "message" : "Required fields are missing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        remove_player_from_room(room_id, player_id)
+    except Exception as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+        {"status" : "success",
+         "message": "Player left the room",
+         "room_id" : room_id,
+        }
+        )
+
 
