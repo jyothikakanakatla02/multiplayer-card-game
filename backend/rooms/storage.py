@@ -23,3 +23,13 @@ def get_room(room_id):
     if room is None:
         raise ValueError("Room not found")
     return room
+def remove_player_from_room(room_id, player_id):
+    if room_id not in active_rooms:
+        raise ValueError("Room not found")
+    room = active_rooms[room_id]
+    for player in room.players:
+        if player.player_id == player_id:
+            room.players.remove(player)
+            break
+    else:
+        raise ValueError("player not found")
