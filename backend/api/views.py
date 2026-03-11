@@ -16,7 +16,7 @@ def create_room_view(request):
     })
 from rest_framework import status
 from players.player import Player
-from rooms.storage import add_player_to_room, remove_player_from_room, start_game as start_game_logic
+from rooms.storage import add_player_to_room, remove_player_from_room, start_game_logic
 @api_view(["POST"])
 def join_room(request):
     room_id = request.data.get("room_id")
@@ -115,6 +115,7 @@ def leave_room(request):
          "room_id" : room_id,
         }
         )
+@api_view(["POST"])
 def start_game(request):
     room_id = request.data.get("room_id")
     player_id = request.data.get("player_id")
