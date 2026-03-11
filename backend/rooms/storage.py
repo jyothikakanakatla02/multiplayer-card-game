@@ -1,4 +1,5 @@
 from .room import Room
+from .constants import LOBBY,IN_GAME
 import random
 import string
 active_rooms = {}
@@ -33,3 +34,15 @@ def remove_player_from_room(room_id, player_id):
             break
     else:
         raise ValueError("player not found")
+def start_game_logic(room_id,player_id):
+    room = get_room(room_id)
+    if room is None:
+        raise ValueError("Room not Found")
+    if player_id != room.host_player_id :
+        raise ValueError("Only Host can start the Game")
+    if room.state != LOBBY:
+        raise ValueError("Game already started")
+    if len(room.players) < 3 :
+        raise ValueError("Not enough players")
+    room.state = IN_GAME
+    return room
