@@ -1,0 +1,2 @@
+LOBBY = "LOBBY"
+IN_GAME = "IN_GAME"
