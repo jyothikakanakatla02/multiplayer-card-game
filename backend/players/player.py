@@ -14,3 +14,4 @@ class Player:
         self.nickname = nickname
         self.avatar = avatar
         self.player_id = str(uuid.uuid4())
+        self.identity = None
