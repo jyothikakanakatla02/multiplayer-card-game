@@ -5,11 +5,11 @@ ALL_IDENTITIES = [
     "Dhoni",
     "Kohli",
     "Bahubali",
-    "KGF",
+    "Ironman",
     "Prabhas",
-    "Allu Arjun",
-    "SRK",
-    "Salman",
-    "Rajinikanth",
-    "Chiranjeevi"
+    "Samson",
+    "Batman",
+    "Samantha",
+    "Rohit",
+    "Mahesh"
 ]

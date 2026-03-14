@@ -1,5 +1,5 @@
 from .room import Room
-from .constants import LOBBY,IN_GAME
+from .constants import LOBBY,IN_GAME,IDENTITY_SELECTION
 import random
 import string
 active_rooms = {}
@@ -49,5 +49,14 @@ def start_game_logic(room_id,player_id):
         raise ValueError("Game already started")
     if len(room.players) < 3 :
         raise ValueError("Not enough players")
-    room.state = IN_GAME
+    room.state = IDENTITY_SELECTION
     return room
+
+def select_identity_logic(room_id,player_id,identity):
+    room = get_room(room_id)
+    room.select_identity(player_id,identity)
+def complete_identity_phase_logic(room_id,player_id):
+    room = get_room(room_id)
+    if player_id != room.host_player_id :
+        raise ValueError("Only host can complete Identity phase")
+    room.complete_identity_phase()

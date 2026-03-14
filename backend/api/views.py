@@ -16,7 +16,7 @@ def create_room_view(request):
     })
 from rest_framework import status
 from players.player import Player
-from rooms.storage import add_player_to_room, remove_player_from_room, start_game_logic, select_identity_logic
+from rooms.storage import add_player_to_room, remove_player_from_room, start_game_logic,select_identity_logic,complete_identity_phase_logic
 @api_view(["POST"])
 def join_room(request):
     room_id = request.data.get("room_id")
@@ -82,6 +82,7 @@ def room_state(request,room_id):
             is_host = False
         players_data.append({"nickname":player.nickname,
                              "avatar": player.avatar,
+                             "identity": player.identity,
                              "is_host" : is_host})
     return Response({
         "status" : "success",
@@ -142,7 +143,7 @@ def start_game(request):
         }
     )
 @api_view(["POST"])
-def select_identity(request):
+def select_identity_api(request):
     room_id = request.data.get("room_id")
     player_id = request.data.get("player_id")
     identity = request.data.get("identity")
@@ -171,6 +172,37 @@ def select_identity(request):
             "room_id" : room_id,
             "player_id" : player_id,
             "identity" : identity
+
+        },
+        status = status.HTTP_200_OK
+    )
+@api_view(["POST"])
+def complete_identity_api(request):
+    room_id = request.data.get("room_id")
+    player_id = request.data.get("player_id")
+    if room_id is None or player_id is None :
+        return Response(
+            {
+                "status" : "error",
+                "message" : "Required fields are missing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try :
+        complete_identity_phase_logic(room_id,player_id)
+    except ValueError as e :
+        return Response(
+            {
+                "status" : "error",
+                "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+        {
+            "status" : "success",
+            "message" : "Identity phase completed",
+            "room_id" : room_id
 
         },
         status = status.HTTP_200_OK

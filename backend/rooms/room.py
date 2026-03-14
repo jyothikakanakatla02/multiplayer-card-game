@@ -20,6 +20,11 @@ class Room:
     def select_identity(self, player_id, identity):
         if self.state != IDENTITY_SELECTION:
             raise ValueError("Identity selection is not allowed right now")
+        identity = identity.strip().capitalize()
+        if identity == "":
+            raise ValueError("Invalid Identity")
+        if identity not in ALL_IDENTITIES :
+            raise ValueError("Choose valid Identity from the list")
         found_player = None
         for player in self.players:
             if player.player_id == player_id:
