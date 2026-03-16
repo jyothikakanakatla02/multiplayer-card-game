@@ -74,20 +74,35 @@ def room_state(request,room_id):
             },
             status = status.HTTP_404_NOT_FOUND
         )
+    if hasattr(room, "deck"):
+        deck_remaining = len(room.deck)
+    else:
+        deck_remaining = None
+    if hasattr(room, "current_turn_player_id"):
+        current_turn_id = room.current_turn_player_id
+    else:
+        current_turn_id = None
     players_data = []
+    current_turn_nickname = None
     for player in room.players:
         if player.player_id == room.host_player_id:
             is_host = True
         else:
             is_host = False
+        if player.player_id == current_turn_id:
+            current_turn_nickname = player.nickname
         players_data.append({"nickname":player.nickname,
                              "avatar": player.avatar,
-                             "identity": player.identity,
+                             "cards_count": len(player.cards),
                              "is_host" : is_host})
     return Response({
         "status" : "success",
         "room_id" : room_id,
+        "state" : room.state,
         "total_players" : len(players_data),
+        "current_turn_player_id" : current_turn_id,
+        "current_turn_nickname" : current_turn_nickname,
+        "deck_remaining" : deck_remaining,
         "players" : players_data
     })
 @api_view(["POST"])

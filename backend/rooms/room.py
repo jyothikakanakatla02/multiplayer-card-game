@@ -61,6 +61,22 @@ class Room:
             player.identity = identity
             unused_identities.remove(identity)
         self.state = IN_GAME
+        def generate_deck(self):
+        if room.state != IN_GAME :
+            raise ValueError("Game not yet started")
+        player_identities = []
+        for player in room.players :
+            player_identities.append(player.identity)
+        room.secret_identity = random.choice(player_identities)
+        current_deck = []
+        for identity in player_identities :
+            i = 0
+            while i < 4 :
+                current_deck.append(identity)
+                i += 1
+        current_deck.append(room.secret_identity)
+        random.shuffle(current_deck)
+        room.deck = current_deck
     def distribute_cards(self):
         if self.state != IN_GAME:
             raise ValueError("Cards distribution is not allowed yet.")
@@ -77,6 +93,8 @@ class Room:
                 card = self.deck.pop()
                 player.cards.append(card)
         self.current_turn_player_id = self.host_player_id
+
+
 
 
                 
