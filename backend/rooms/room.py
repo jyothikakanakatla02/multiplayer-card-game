@@ -7,6 +7,7 @@ class Room:
         self.host_player_id = host_player.player_id
         self.players = []
         self.state = LOBBY
+        self.deck = []
         self.add_player(host_player)
     def add_player(self,player):
         if self.state != LOBBY:
@@ -60,8 +61,22 @@ class Room:
             player.identity = identity
             unused_identities.remove(identity)
         self.state = IN_GAME
-        
-
+    def distribute_cards(self):
+        if self.state != IN_GAME:
+            raise ValueError("Cards distribution is not allowed yet.")
+        if len(self.deck) == 0:
+            raise ValueError("Deck is empty")                                                   
+        if len(self.deck) != len(self.players)*4 + 1:
+            raise ValueError("Deck does not match expected distribution")
+        for player in self.players:
+            if player.player_id == self.host_player_id:
+                cards_to_give = 5 
+            else:
+                cards_to_give = 4
+            for i in range(cards_to_give):
+                card = self.deck.pop()
+                player.cards.append(card)
+        self.current_turn_player_id = self.host_player_id
 
 
                 
