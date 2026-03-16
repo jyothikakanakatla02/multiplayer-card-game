@@ -61,7 +61,7 @@ class Room:
             player.identity = identity
             unused_identities.remove(identity)
         self.state = IN_GAME
-        def generate_deck(self):
+    def generate_deck(self):
         if room.state != IN_GAME :
             raise ValueError("Game not yet started")
         player_identities = []
