@@ -55,8 +55,15 @@ def start_game_logic(room_id,player_id):
 def select_identity_logic(room_id,player_id,identity):
     room = get_room(room_id)
     room.select_identity(player_id,identity)
+    if all(player.identity is not None for player in room.players):
+        room.generate_deck()
+        room.distribute_cards()
+        room.state = IN_GAME
 def complete_identity_phase_logic(room_id,player_id):
     room = get_room(room_id)
-    if player_id != room.host_player_id :
+    if player_id != room.host_player_id:
         raise ValueError("Only host can complete Identity phase")
     room.complete_identity_phase()
+    room.generate_deck()
+    room.distribute_cards()
+    room.state = IN_GAME

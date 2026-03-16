@@ -15,3 +15,4 @@ class Player:
         self.avatar = avatar
         self.player_id = str(uuid.uuid4())
         self.identity = None
+        self.cards = []
