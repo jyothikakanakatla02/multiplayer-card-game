@@ -1,4 +1,4 @@
-from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES
+from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES,ROUND_OVER
 import random
 class Room:
     def __init__(self,room_id,host_player):
@@ -93,6 +93,48 @@ class Room:
                 card = self.deck.pop()
                 player.cards.append(card)
         self.current_turn_player_id = self.host_player_id
+    def pass_card(self,player_id,card_index):
+        if self.state == ROUND_OVER:
+            raise ValueError("Round already completed")
+        if self.state != IN_GAME:
+            raise ValueError("Game not in progress")
+        if player_id != self.current_turn_player_id:
+            raise ValueError("Not your Turn")
+        for player in self.players:
+            if player.player_id == player_id :
+                current_player = player
+                break
+        else:
+            raise ValueError("Player not found")
+        if card_index < 0 or card_index >=len(current_player.cards):
+            raise ValueError("Invalid card index")
+        passed_card = current_player.cards.pop(card_index)
+        current_index = self.players.index(current_player)
+        next_index = (current_index + 1) % len(self.players)
+        next_player = self.players[next_index]
+        next_player.cards.append(passed_card)
+        self.current_turn_player_id = next_player.player_id
+        if len(current_player.cards) == 4 :
+            first_card = current_player.cards[0]
+            for card in current_player.cards :
+                if first_card != card :
+                    break
+            else:
+                self.round_winner = current_player.player_id
+                self.state = ROUND_OVER
+                return
+    def get_player_hand(self,player_id):
+        for player in self.players:
+            if player.player_id == player_id :
+                current_player = player 
+                break
+        else:
+            raise ValueError("Player not found")
+        cards_in_hand = current_player.cards.copy()
+        return {
+        "cards" : cards_in_hand
+        }
+
 
 
 
