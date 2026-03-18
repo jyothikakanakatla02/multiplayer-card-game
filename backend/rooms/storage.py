@@ -67,3 +67,11 @@ def complete_identity_phase_logic(room_id,player_id):
     room.generate_deck()
     room.distribute_cards()
     room.state = IN_GAME
+def pass_card_logic(room_id,player_id,card_index):
+    room = get_room(room_id)
+    room.pass_card(player_id,card_index)
+    return room
+def get_player_hand_logic(room_id,player_id):
+    room = get_room(room_id)
+    result = room.get_player_hand(player_id)
+    return result

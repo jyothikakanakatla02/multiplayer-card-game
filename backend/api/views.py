@@ -1,5 +1,5 @@
 from players.player import Player
-from rooms.storage import create_room
+from rooms.storage import create_room,pass_card_logic,get_player_hand_logic
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 @api_view(["POST"])
@@ -222,3 +222,50 @@ def complete_identity_api(request):
         },
         status = status.HTTP_200_OK
     )
+@api_view(["POST"])
+def pass_card(request):
+    room_id = request.data.get("room_id")
+    player_id = request.data.get("player_id")
+    card_index = request.data.get("card_index")
+    card_index = int(card_index)
+    if room_id is None or player_id is None or card_index is None:
+        return Response(
+            {"status" : "error",
+             "message" : "Required fields are missing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        room = pass_card_logic(room_id,player_id,card_index)
+    except ValueError as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+        {"status" : "success",
+         "message" : "Card passed successfully",
+         "room_state" : room.state
+        },
+        status = status.HTTP_200_OK
+    )
+@api_view(["GET"])
+def get_player_hand_api(request,room_id,player_id):
+    try:
+        result = get_player_hand_logic(room_id,player_id)
+    except ValueError as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+        {"status" : "success",
+         "cards" : result["cards"]
+        },
+        status = status.HTTP_200_OK
+    )
+
