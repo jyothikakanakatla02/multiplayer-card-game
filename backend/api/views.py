@@ -84,6 +84,8 @@ def room_state(request,room_id):
         current_turn_id = None
     players_data = []
     current_turn_nickname = None
+    winner_id = getattr(room, "round_winner", None)
+    round_winner_nickname = None
     for player in room.players:
         if player.player_id == room.host_player_id:
             is_host = True
@@ -91,6 +93,8 @@ def room_state(request,room_id):
             is_host = False
         if player.player_id == current_turn_id:
             current_turn_nickname = player.nickname
+        if player.player_id == winner_id :
+            round_winner_nickname = player.nickname
         players_data.append({"nickname":player.nickname,
                              "avatar": player.avatar,
                              "cards_count": len(player.cards),
@@ -100,6 +104,8 @@ def room_state(request,room_id):
         "room_id" : room_id,
         "state" : room.state,
         "total_players" : len(players_data),
+        "round_winner_player_id" : winner_id,
+        "round_winner_nickname" : round_winner_nickname,
         "current_turn_player_id" : current_turn_id,
         "current_turn_nickname" : current_turn_nickname,
         "deck_remaining" : deck_remaining,
