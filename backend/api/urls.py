@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import create_room_view,join_room,room_state,leave_room,start_game,select_identity_api,complete_identity_api
+from .views import create_room_view,join_room,room_state,leave_room,start_game,select_identity_api,complete_identity_api,pass_card,get_player_hand_api
 urlpatterns = [
     path("create-room/", create_room_view),
     path("join-room/", join_room, name="join-room"),
@@ -7,6 +7,8 @@ urlpatterns = [
     path("leave-room/", leave_room),
     path("start-game/", start_game),
     path("select-identity/", select_identity_api),
-    path("complete-identity/", complete_identity_api)
+    path("complete-identity/", complete_identity_api),
+    path("pass-card/", pass_card),
+    path("my-cards/<str:room_id>/<str:player_id>/",get_player_hand_api)
 ]
 
