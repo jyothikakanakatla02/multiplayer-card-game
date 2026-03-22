@@ -75,3 +75,7 @@ def get_player_hand_logic(room_id,player_id):
     room = get_room(room_id)
     result = room.get_player_hand(player_id)
     return result
+def participate_in_star_logic(room_id, player_id):
+    room = get_room(room_id)
+    room.participate_in_star(player_id)
+    return room 

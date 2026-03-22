@@ -1,4 +1,4 @@
-from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES,ROUND_OVER
+from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES,STAR_RACE,ROUND_RESULT
 import random
 class Room:
     def __init__(self,room_id,host_player):
@@ -72,9 +72,19 @@ class Room:
         for identity in player_identities :
             i = 0
             while i < 4 :
-                current_deck.append(identity)
+                current_deck.append(
+                    {
+                        "identity" : identity,
+                        "is_secret" : False
+                    }
+                )
                 i += 1
-        current_deck.append(self.secret_identity)
+        current_deck.append(
+            {
+                "identity" : self.secret_identity,
+                "is_secret" : True
+            }
+        )
         random.shuffle(current_deck)
         self.deck = current_deck
     def distribute_cards(self):
@@ -94,7 +104,7 @@ class Room:
                 player.cards.append(card)
         self.current_turn_player_id = self.host_player_id
     def pass_card(self,player_id,card_index):
-        if self.state == ROUND_OVER:
+        if self.state == STAR_RACE:
             raise ValueError("Round already completed")
         if self.state != IN_GAME:
             raise ValueError("Game not in progress")
@@ -117,11 +127,12 @@ class Room:
         if len(current_player.cards) == 4 :
             first_card = current_player.cards[0]
             for card in current_player.cards :
-                if first_card != card :
+                if first_card["identity"] != card["identity"] :
                     break
             else:
                 self.round_winner = current_player.player_id
-                self.state = ROUND_OVER
+                self.state = STAR_RACE
+                self.star_order = []
                 return
     def get_player_hand(self,player_id):
         for player in self.players:
@@ -130,10 +141,44 @@ class Room:
                 break
         else:
             raise ValueError("Player not found")
-        cards_in_hand = current_player.cards.copy()
+        cards_in_hand = [card["identity"] for card in current_player.cards]
         return {
         "cards" : cards_in_hand
         }
+    def participate_in_star(self,player_id):
+        if self.state != STAR_RACE :
+            raise ValueError ("Invalid Room state")
+        if player_id == self.round_winner :
+            raise ValueError ("Winner cannot participate in Star Race")
+        for player in self.players:
+            if player.player_id == player_id :
+                current_player = player
+                break
+        else:
+            raise ValueError("Player not found ")
+        if player_id in self.star_order:
+            raise ValueError ("Player cannot participate in star race twice ")
+        self.star_order.append(player_id)
+        if len(self.star_order) == len(self.players) - 1:
+            self.calculate_scores()
+    def calculate_scores(self):
+        player_map= {}
+        for player in self.players :
+            if player.player_id == self.round_winner:
+                player.score += 1000
+            player_map[player.player_id] = player 
+        for index,player_id in enumerate(self.star_order) :
+            player = player_map[player_id]
+            player.score += 900 - (index * 100)
+        self.scores_snapshot = []
+        for player in self.players:
+            if any(card["is_secret"] for card in player.cards):
+                player.score += 100
+            self.scores_snapshot.append({
+            "nickname" : player.nickname,
+            "score" : player.score
+            })
+        self.state = ROUND_RESULT
 
 
 
