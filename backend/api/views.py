@@ -1,5 +1,5 @@
 from players.player import Player
-from rooms.storage import create_room,pass_card_logic,get_player_hand_logic
+from rooms.storage import create_room,pass_card_logic,get_player_hand_logic,force_finish_round_logic,reset_round_logic
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 @api_view(["POST"])
@@ -274,4 +274,55 @@ def get_player_hand_api(request,room_id,player_id):
         },
         status = status.HTTP_200_OK
     )
-
+@api_view(["POST"])
+def force_finish_round_api(request):
+    room_id = request.data.get("room_id")
+    if room_id is None:
+        return Response(
+            {"status" : "error",
+             "message" : "Required fields are missing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        room = force_finish_round_logic(room_id)
+    except ValueError as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+        {"status" : "success",
+         "message" : "Round finished successfully",
+         "room_state" : room.state
+        },
+        status = status.HTTP_200_OK
+    )
+@api_view(["POST"]) 
+def reset_round_api(request):
+    room_id = request.data.get("room_id")
+    if room_id is None:
+        return Response(
+            {"status" : "error",
+             "message" : "Required fields are missing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        ) 
+    try:
+        room = reset_round_logic(room_id)
+    except ValueError as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+        {"status" : "success",
+         "message" : "Round reset completed",
+         "room_state" : room.state
+        },
+        status = status.HTTP_200_OK
+    )

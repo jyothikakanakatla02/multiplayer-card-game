@@ -1,4 +1,4 @@
-from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES,ROUND_OVER
+from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES,ROUND_OVER,STAR_RACE
 import random
 class Room:
     def __init__(self,room_id,host_player):
@@ -8,6 +8,7 @@ class Room:
         self.players = []
         self.state = LOBBY
         self.deck = []
+        self.star_order = []
         self.add_player(host_player)
     def add_player(self,player):
         if self.state != LOBBY:
@@ -134,9 +135,33 @@ class Room:
         return {
         "cards" : cards_in_hand
         }
-
-
-
-
-
-                
+    def force_finish_round(self):
+        if self.state != STAR_RACE:
+            raise ValueError("Invalid state")
+        for player in self.players:
+            if player.player_id == self.round_winner:
+                continue
+            if player.player_id in self.star_order:
+                continue
+            self.star_order.append(player.player_id)
+        if len(self.star_order) == len(self.players) - 1:
+                self.state = ROUND_OVER
+                for player in self.players:
+                    if player.player_id == self.round_winner:
+                        player.score += 1000
+                        break
+                player_map = {player.player_id : player for player in self.players}
+                for index, player_id in enumerate(self.star_order):
+                    player = player_map[player_id]
+                    score = 900 - (index * 100)
+                    player.score += score
+    def reset_round(self):
+        self.round_winner = None
+        self.star_order = []
+        self.state = IDENTITY_SELECTION
+        for player in self.players:
+            player.cards = []
+            player.identity = None
+        self.current_turn_player_id = None
+        self.secret_identity = None
+        self.deck = []

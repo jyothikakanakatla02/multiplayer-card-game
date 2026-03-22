@@ -75,3 +75,11 @@ def get_player_hand_logic(room_id,player_id):
     room = get_room(room_id)
     result = room.get_player_hand(player_id)
     return result
+def force_finish_round_logic(room_id):
+    room = get_room(room_id)
+    room.force_finish_round()
+    return room
+def reset_round_logic(room_id):
+    room = get_room(room_id)
+    room.reset_round()
+    return room
