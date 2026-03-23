@@ -1,5 +1,5 @@
 from players.player import Player
-from rooms.storage import create_room,pass_card_logic,get_player_hand_logic,force_finish_round_logic,reset_round_logic,participate_in_star_logic
+from rooms.storage import create_room,pass_card_logic,get_player_hand_logic,participate_in_star_logic,force_finish_round_logic
 from rooms.constants import ROUND_RESULT
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -17,7 +17,7 @@ def create_room_view(request):
     })
 from rest_framework import status
 from players.player import Player
-from rooms.storage import add_player_to_room, remove_player_from_room, start_game_logic,select_identity_logic,complete_identity_phase_logic
+from rooms.storage import add_player_to_room, remove_player_from_room, start_game_logic,select_identity_logic,complete_identity_phase_logic,reset_round_logic
 @api_view(["POST"])
 def join_room(request):
     room_id = request.data.get("room_id")
@@ -285,28 +285,31 @@ def get_player_hand_api(request,room_id,player_id):
         status = status.HTTP_200_OK
     )
 @api_view(["POST"])
-def force_finish_round_api(request):
+def participate_in_star_api(request):
     room_id = request.data.get("room_id")
-    if room_id is None:
+    player_id = request.data.get("player_id")
+    if room_id is None or player_id is None:
         return Response(
-            {"status" : "error",
-             "message" : "Required fields are missing"
+            {
+                "status" : "error",
+                "message" : "Required fields are misssing"
             },
             status = status.HTTP_400_BAD_REQUEST
         )
     try:
-        room = force_finish_round_logic(room_id)
+        participate_in_star_logic(room_id, player_id)
     except ValueError as e:
         return Response(
-            {"status" : "error",
-             "message" : str(e)
+            {
+                "status" : "error",
+                "message" : str(e)
             },
             status = status.HTTP_400_BAD_REQUEST
         )
     return Response(
-        {"status" : "success",
-         "message" : "Round finished successfully",
-         "room_state" : room.state
+        {
+            "status" : "success",
+            "message" : "Star participation recorded"
         },
         status = status.HTTP_200_OK
     )
@@ -337,31 +340,32 @@ def reset_round_api(request):
         status = status.HTTP_200_OK
     )
 @api_view(["POST"])
-def participate_in_star_api(request):
+def force_finish_round_api(request):
     room_id = request.data.get("room_id")
-    player_id = request.data.get("player_id")
-    if room_id is None or player_id is None:
+    if room_id is None:
         return Response(
-            {
-                "status" : "error",
-                "message" : "Required fields are misssing"
+            {"status" : "error",
+             "message" : "Required fields are missing"
             },
             status = status.HTTP_400_BAD_REQUEST
         )
     try:
-        participate_in_star_logic(room_id, player_id)
+        room = force_finish_round_logic(room_id)
     except ValueError as e:
         return Response(
-            {
-                "status" : "error",
-                "message" : str(e)
+            {"status" : "error",
+             "message" : str(e)
             },
             status = status.HTTP_400_BAD_REQUEST
         )
     return Response(
-         {"status" : "success",
-          "message" : "Star participation recorded"
-         },
-         status = status.HTTP_200_OK
+        {"status" : "success",
+         "message" : "Round finished successfully",
+         "room_state" : room.state
+        },
+        status = status.HTTP_200_OK
     )
-            
+
+
+
+    
