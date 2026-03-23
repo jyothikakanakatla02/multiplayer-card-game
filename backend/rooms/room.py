@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES,ROUND_OVER,STAR_RACE
-=======
-from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES,STAR_RACE,ROUND_RESULT
->>>>>>> origin/feature/star-race-logic
+from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES,ROUND_OVER,STAR_RACE,ROUND_RESULT
 import random
 class Room:
     def __init__(self,room_id,host_player):
@@ -150,7 +146,6 @@ class Room:
         return {
         "cards" : cards_in_hand
         }
-<<<<<<< HEAD
     def force_finish_round(self):
         if self.state != STAR_RACE:
             raise ValueError("Invalid state")
@@ -181,7 +176,6 @@ class Room:
         self.current_turn_player_id = None
         self.secret_identity = None
         self.deck = []
-=======
     def participate_in_star(self,player_id):
         if self.state != STAR_RACE :
             raise ValueError ("Invalid Room state")
@@ -217,9 +211,3 @@ class Room:
             })
         self.state = ROUND_RESULT
 
-
-
-
-
-                
->>>>>>> origin/feature/star-race-logic

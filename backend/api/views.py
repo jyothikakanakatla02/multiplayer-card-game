@@ -336,6 +336,7 @@ def reset_round_api(request):
         },
         status = status.HTTP_200_OK
     )
+@api_view(["POST"])
 def participate_in_star_api(request):
     room_id = request.data.get("room_id")
     player_id = request.data.get("player_id")

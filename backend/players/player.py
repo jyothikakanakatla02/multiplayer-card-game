@@ -16,3 +16,4 @@ class Player:
         self.player_id = str(uuid.uuid4())
         self.identity = None
         self.cards = []
+        self.score = 0
