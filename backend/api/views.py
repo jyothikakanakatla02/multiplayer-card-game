@@ -1,5 +1,6 @@
 from players.player import Player
-from rooms.storage import create_room,pass_card_logic,get_player_hand_logic
+from rooms.storage import create_room,pass_card_logic,get_player_hand_logic,force_finish_round_logic,reset_round_logic,participate_in_star_logic
+from rooms.constants import ROUND_RESULT
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 @api_view(["POST"])
@@ -99,6 +100,14 @@ def room_state(request,room_id):
                              "avatar": player.avatar,
                              "cards_count": len(player.cards),
                              "is_host" : is_host})
+    if room.state == ROUND_RESULT :
+        return Response(
+            {
+                "status" : "success",
+                "scores_snapshot" : room.scores_snapshot
+            },
+            status = status.HTTP_200_OK
+        )
     return Response({
         "status" : "success",
         "room_id" : room_id,
@@ -109,7 +118,8 @@ def room_state(request,room_id):
         "current_turn_player_id" : current_turn_id,
         "current_turn_nickname" : current_turn_nickname,
         "deck_remaining" : deck_remaining,
-        "players" : players_data
+        "players" : players_data,
+        "scores_snapshot" : room.scores_snapshot if room.state == ROUND_RESULT else None 
     })
 @api_view(["POST"])
 def leave_room(request):
@@ -274,4 +284,84 @@ def get_player_hand_api(request,room_id,player_id):
         },
         status = status.HTTP_200_OK
     )
-
+@api_view(["POST"])
+def force_finish_round_api(request):
+    room_id = request.data.get("room_id")
+    if room_id is None:
+        return Response(
+            {"status" : "error",
+             "message" : "Required fields are missing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        room = force_finish_round_logic(room_id)
+    except ValueError as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+        {"status" : "success",
+         "message" : "Round finished successfully",
+         "room_state" : room.state
+        },
+        status = status.HTTP_200_OK
+    )
+@api_view(["POST"]) 
+def reset_round_api(request):
+    room_id = request.data.get("room_id")
+    if room_id is None:
+        return Response(
+            {"status" : "error",
+             "message" : "Required fields are missing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        ) 
+    try:
+        room = reset_round_logic(room_id)
+    except ValueError as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+        {"status" : "success",
+         "message" : "Round reset completed",
+         "room_state" : room.state
+        },
+        status = status.HTTP_200_OK
+    )
+@api_view(["POST"])
+def participate_in_star_api(request):
+    room_id = request.data.get("room_id")
+    player_id = request.data.get("player_id")
+    if room_id is None or player_id is None:
+        return Response(
+            {
+                "status" : "error",
+                "message" : "Required fields are misssing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        participate_in_star_logic(room_id, player_id)
+    except ValueError as e:
+        return Response(
+            {
+                "status" : "error",
+                "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+         {"status" : "success",
+          "message" : "Star participation recorded"
+         },
+         status = status.HTTP_200_OK
+    )
+            
