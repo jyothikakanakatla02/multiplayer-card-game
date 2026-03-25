@@ -1,5 +1,5 @@
 from players.player import Player
-from rooms.storage import create_room,pass_card_logic,get_player_hand_logic,force_finish_round_logic,reset_round_logic,participate_in_star_logic
+from rooms.storage import create_room,pass_card_logic,get_player_hand_logic,force_finish_round_logic,reset_round_logic,participate_in_star_logic,set_total_rounds_logic
 from rooms.constants import ROUND_RESULT
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -363,5 +363,33 @@ def participate_in_star_api(request):
           "message" : "Star participation recorded"
          },
          status = status.HTTP_200_OK
+    )
+@api_view(["POST"])
+def set_rounds_api(request):
+    room_id = request.data.get("room_id")
+    player_id = request.data.get("player_id")
+    if room_id is None or player_id is None:
+        return Response(
+            {"status" : "error",
+             "message" : "Required fields are missing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        total_rounds = int(total_rounds)
+    except ValueError as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+        {"status" : "success",
+         "message" : "Rounds set successfully",
+         "room_id" : room_id,
+         "total_rounds" : total_rounds
+        },
+        status = status.HTTP_200_OK
     )
             

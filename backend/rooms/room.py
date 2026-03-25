@@ -1,4 +1,4 @@
-from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES,ROUND_OVER,STAR_RACE,ROUND_RESULT
+from .constants import LOBBY,IDENTITY_SELECTION,IN_GAME,ALL_IDENTITIES,ROUND_OVER,STAR_RACE,ROUND_RESULT,GAME_OVER
 import random
 class Room:
     def __init__(self,room_id,host_player):
@@ -10,6 +10,7 @@ class Room:
         self.deck = []
         self.star_order = []
         self.add_player(host_player)
+        self.star_player_id = None
     def add_player(self,player):
         if self.state != LOBBY:
             raise ValueError("Game already started")
@@ -169,13 +170,24 @@ class Room:
     def reset_round(self):
         self.round_winner = None
         self.star_order = []
-        self.state = IDENTITY_SELECTION
         for player in self.players:
             player.cards = []
             player.identity = None
         self.current_turn_player_id = None
         self.secret_identity = None
         self.deck = []
+        self.current_round += 1
+        if self.current_round > self.total_rounds:
+            max_score = -1
+            winner_player = None
+            for player in self.players:
+                if player.score > max_score:
+                    max_score = player.score
+                    winner_player = player
+                    self.star_player_id = winner_player.player_id
+                    self.state = GAME_OVER
+                    return
+                self.state = IDENTITY_SELECTION
     def participate_in_star(self,player_id):
         if self.state != STAR_RACE :
             raise ValueError ("Invalid Room state")
