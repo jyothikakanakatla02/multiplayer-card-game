@@ -9,6 +9,9 @@ class Room:
         self.state = LOBBY
         self.deck = []
         self.star_order = []
+        self.round_scores = []
+        self.total_rounds = 1
+        self.current_round = 1
         self.add_player(host_player)
         self.star_player_id = None
     def add_player(self,player):
@@ -20,6 +23,17 @@ class Room:
             if existing_player.nickname == player.nickname:
                 raise ValueError("Nickname already taken, Please choose another nickname")
         self.players.append(player)
+    def set_rounds(self, player_id, total_rounds):
+        if player_id != self.host_player_id:
+            raise ValueError("Only host can set the rounds")
+        if self.state != LOBBY :
+            raise ValueError("Invalid Room state")
+        if self.total_rounds != 1 :
+            raise ValueError("Round selection already completed")
+        rounds_list = [3,5,7]
+        if total_rounds not in rounds_list :
+            raise ValueError("Only select among 3/5/7")
+        self.total_rounds = total_rounds
     def select_identity(self, player_id, identity):
         if self.state != IDENTITY_SELECTION:
             raise ValueError("Identity selection is not allowed right now")
@@ -206,17 +220,32 @@ class Room:
             self.calculate_scores()
     def calculate_scores(self):
         player_map= {}
+        round_score_map = {}
         for player in self.players :
             if player.player_id == self.round_winner:
                 player.score += 1000
+                round_score_map[player.player_id] = round_score_map.get(player.player_id , 0) + 1000
             player_map[player.player_id] = player 
+            
         for index,player_id in enumerate(self.star_order) :
             player = player_map[player_id]
-            player.score += 900 - (index * 100)
-        self.scores_snapshot = []
+            score = 900 - (index * 100)
+            player.score += score
+            round_score_map[player.player_id] = round_score_map.get(player.player_id , 0) + score
         for player in self.players:
             if any(card["is_secret"] for card in player.cards):
                 player.score += 100
+                round_score_map[player.player_id] = round_score_map.get(player.player_id , 0) + 100
+        round_display = []
+        for player in self.players:
+            temp_score = round_score_map.get(player.player_id, 0)
+            round_display.append({
+            "nickname" : player.nickname,
+            "score" : temp_score
+            })
+        self.round_scores.append(round_display)
+        self.scores_snapshot = []
+        for player in self.players:
             self.scores_snapshot.append({
             "nickname" : player.nickname,
             "score" : player.score
