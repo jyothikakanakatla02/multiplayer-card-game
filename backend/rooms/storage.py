@@ -87,4 +87,8 @@ def participate_in_star_logic(room_id, player_id):
     room = get_room(room_id)
     room.participate_in_star(player_id)
     return room 
+def set_total_rounds_logic(room_id,player_id,total_rounds):
+    room = get_room(room_id)
+    room.set_rounds(player_id,total_rounds)
+    return room
 

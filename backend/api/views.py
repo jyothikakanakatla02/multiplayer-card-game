@@ -1,6 +1,6 @@
 from players.player import Player
-from rooms.storage import create_room,pass_card_logic,get_player_hand_logic,force_finish_round_logic,reset_round_logic,participate_in_star_logic
-from rooms.constants import ROUND_RESULT
+from rooms.storage import create_room,pass_card_logic,get_player_hand_logic,force_finish_round_logic,reset_round_logic,participate_in_star_logic,set_total_rounds_logic
+from rooms.constants import ROUND_RESULT,IN_GAME,GAME_OVER
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 @api_view(["POST"])
@@ -86,6 +86,8 @@ def room_state(request,room_id):
     players_data = []
     current_turn_nickname = None
     winner_id = getattr(room, "round_winner", None)
+    star_player_id = getattr(room,"star_player_id", None)
+    star_player_nickname = None
     round_winner_nickname = None
     for player in room.players:
         if player.player_id == room.host_player_id:
@@ -96,18 +98,13 @@ def room_state(request,room_id):
             current_turn_nickname = player.nickname
         if player.player_id == winner_id :
             round_winner_nickname = player.nickname
+        if player.player_id == star_player_id :
+            star_player_nickname = player.nickname
         players_data.append({"nickname":player.nickname,
                              "avatar": player.avatar,
                              "cards_count": len(player.cards),
+                             "score":player.score,
                              "is_host" : is_host})
-    if room.state == ROUND_RESULT :
-        return Response(
-            {
-                "status" : "success",
-                "scores_snapshot" : room.scores_snapshot
-            },
-            status = status.HTTP_200_OK
-        )
     return Response({
         "status" : "success",
         "room_id" : room_id,
@@ -115,11 +112,13 @@ def room_state(request,room_id):
         "total_players" : len(players_data),
         "round_winner_player_id" : winner_id,
         "round_winner_nickname" : round_winner_nickname,
-        "current_turn_player_id" : current_turn_id,
+        "current_turn_player_id" : current_turn_id if room.state == IN_GAME else None,
         "current_turn_nickname" : current_turn_nickname,
-        "deck_remaining" : deck_remaining,
+        "deck_remaining" : deck_remaining if room.state == IN_GAME else 0,
         "players" : players_data,
-        "scores_snapshot" : room.scores_snapshot if room.state == ROUND_RESULT else None 
+        "scores_snapshot" : room.scores_snapshot,
+        "star_player_nickname" : star_player_nickname if room.state == GAME_OVER else None,
+        "round_scores": room.round_scores if room.state in [ROUND_RESULT, GAME_OVER] else None
     })
 @api_view(["POST"])
 def leave_room(request):
@@ -363,5 +362,43 @@ def participate_in_star_api(request):
           "message" : "Star participation recorded"
          },
          status = status.HTTP_200_OK
+    )
+@api_view(["POST"])
+def set_rounds_api(request):
+    room_id = request.data.get("room_id")
+    player_id = request.data.get("player_id")
+    total_rounds = request.data.get("total_rounds")
+    if room_id is None or player_id is None or total_rounds is None:
+        return Response(
+            {"status" : "error",
+             "message" : "Required fields are missing"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        total_rounds = int(total_rounds)
+    except ValueError as e:
+        return Response(
+            {"status" : "error",
+             "message" : "Total rounds must be a number"
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        set_total_rounds_logic(room_id, player_id, total_rounds)
+    except ValueError as e:
+        return Response(
+            {"status" : "error",
+             "message" : str(e)
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+    return Response(
+        {"status" : "success",
+         "message" : "Rounds set successfully",
+         "room_id" : room_id,
+         "total_rounds" : total_rounds
+        },
+        status = status.HTTP_200_OK
     )
             
