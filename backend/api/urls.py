@@ -14,7 +14,5 @@ urlpatterns = [
     path("participate-in-star/", participate_in_star_api),
     path("force-finish-round/",force_finish_round_api),
     path("reset-round/",reset_round_api)
-    
-    
 ]
 
